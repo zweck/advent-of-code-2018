@@ -1,17 +1,17 @@
 const { promisify } = require('util')
 const readFile  = promisify(require('fs').readFile)
 const {
-  empty,
+  reduceWhile,
+  split,
+  identity,
+  compose,
+  map,
   keys,
+  groupBy,
   multiply,
-  equals,
   length,
   filter,
-  identity,
-  groupBy,
-  split,
-  map,
-  compose
+  equals
 } = require('ramda')
 
 const part1 = input => {
@@ -30,10 +30,36 @@ const part1 = input => {
   console.log(calced)
 }
 
+const part2 = input => {
+  const found = reduceWhile(
+    a => !length(a),
+    (acc, i) => {
+    const matched = reduceWhile(
+      a => !length(a),
+      (acc, j) => {
+        const charsI = [...i]
+        const charsJ = [...j]
+
+        const diff = charsI.reduce((a, c, i) => a + (c === charsJ[i] ? 0 : 1), 0)
+
+        if (diff === 1) {
+          return [i, j]
+        }
+        return acc
+      },
+      [],
+      input
+    )
+    return matched
+  }, [], input)
+  console.log(found)
+}
+
 const main = async () => {
   const buffer =  await readFile('./input.txt', 'utf8')
   const input = buffer.trim().split('\n')
   part1(input)
+  part2(input)
 }
 
 main()
