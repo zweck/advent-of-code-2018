@@ -14,25 +14,28 @@ const parseCoord = coord => {
   }
 }
 
+const coordKey = ({ w, left, h, top }) => `${w+left}x${h+top}`
+
+const mapFabric = (map, coord) => {
+  const { top, left, width, height } = parseCoord(coord)
+  R.forEach((w) => {
+    R.forEach((h) => {
+      const key = coordKey({ w, left, h, top })
+      map[key] = R.pathOr(0, [key], map) + 1
+    }, R.range(0, height))
+  }, R.range(0, width))
+  return map
+}
+
+const sumOverlaps = R.reduce((t, v) => v > 1 ? (t+1) : t, 0)
+
 const part1 = input => {
-
-  const map = {}
-  R.forEach(
-    (coord) => {
-      const { top, left, width, height } = parseCoord(coord)
-
-      R.forEach((w) => {
-        R.forEach((h) => {
-          const coord = `${w+left}x${h+top}`
-          const val = R.pathOr(0, [coord], map)
-          map[coord] = val + 1
-        }, R.range(0, height))
-      }, R.range(0, width))
-
-    },
+  const map = R.reduce(
+    mapFabric,
+    {},
     input
   )
-  const overlap = R.reduce((t, v) => v > 1 ? (t+1) : t, 0, R.values(map))
+  const overlap = sumOverlaps(R.values(map))
   console.log(overlap)
 }
 
