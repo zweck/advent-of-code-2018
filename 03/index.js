@@ -7,23 +7,23 @@ const parseCoord = coord => {
   const parts = coordMatcher.exec(coord)
   return {
     id: +parts[1],
-    top: +parts[3],
-    left: +parts[2],
-    width: +parts[4],
-    height: +parts[5],
+    y: +parts[3],
+    x: +parts[2],
+    w: +parts[4],
+    h: +parts[5],
   }
 }
 
-const coordKey = ({ w, left, h, top }) => `${w+left}x${h+top}`
+const coordKey = ({ w, x, h, y }) => `${w+x}x${h+y}`
 
 const mapFabric = (map, coord) => {
-  const { top, left, width, height } = parseCoord(coord)
+  const { y, x, w, h } = parseCoord(coord)
   R.forEach((w) => {
     R.forEach((h) => {
-      const key = coordKey({ w, left, h, top })
+      const key = coordKey({ w, x, h, y })
       map[key] = R.pathOr(0, [key], map) + 1
-    }, R.range(0, height))
-  }, R.range(0, width))
+    }, R.range(0, h))
+  }, R.range(0, w))
   return map
 }
 
@@ -39,7 +39,22 @@ const part1 = input => {
   console.log(overlap)
 }
 
+const isOverlapped = (a, b) => (
+  R.not(R.equals(a.id, b.id)) &&
+  R.lt(a.x, R.add(b.x, b.w)) &&
+  R.lt(a.y, R.add(b.y, b.h)) &&
+  R.lt(b.x, R.add(a.x, a.w)) &&
+  R.lt(b.y, R.add(a.y, a.h))
+)
+
 const part2 = input => {
+  const parsedInput = R.map(parseCoord, input)
+  const result = R.find(a => (
+    R.none(b => (
+      isOverlapped(a,b)
+    ), parsedInput)
+  ), parsedInput)
+  console.log(result)
 }
 
 const main = async () => {
